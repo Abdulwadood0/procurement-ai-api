@@ -30,7 +30,7 @@ This application translates natural-language procurement questions into secure M
 - **Natural Language to MongoDB (MQL):** Translates complex procurement inquiries into structured MongoDB `find` filters and multi-stage `aggregate` pipelines using OpenAI structured outputs (`function_calling`).
 - **Autonomous Query Self-Correction:** When validation detects an invalid field, unsupported operator, or malformed pipeline, the error feedback is automatically fed back to the LLM to regenerate a corrected query (configurable retry limit).
 - **Two-Tier Safety & Allowlist Validation:** Strict AST-style recursive validation enforces allowed query stages (`$match`, `$group`, `$sort`, `$limit`, `$project`), authorized operators, and a schema-defined field allowlist—preventing arbitrary operations, code injection, and unsafe operator usage.
-- **Smart Intent Routing:** Distinguishes between database-bound queries and conversational questions/greetings, routing direct chit-chat straight to answer generation without hitting the database.
+- **Smart Intent Routing:** Distinguishes between database-bound queries and conversational messages/greetings. Non-data questions bypass both MongoDB execution and the answer-synthesis LLM, routing to a lightweight static fallback node — so greetings like "hi" or "hello" don't burn tokens on generate_answer.
 - **Automated Type Coercion:** Automatically converts ISO date strings into native BSON/Python `datetime` objects for date-based filters (`creation_date`, `purchase_date`), and serializes BSON `ObjectId`s.
 - **Real-Time Token Streaming (SSE):** Incrementally streams generated responses using Server-Sent Events, emitting token chunks, execution metadata (including the generated query and pipeline), and structured error events.
 - **Stateful Conversational Memory:** Uses LangGraph's checkpointer (`InMemorySaver`) keyed by `thread_id` to maintain multi-turn conversational context with sliding window history management.
@@ -51,15 +51,15 @@ flowchart TD
         AddUserMessage --> GenerateQuery[generate_query\nOpenAI Structured Output]
         
         GenerateQuery --> RouteAfterQuery{requires_query?}
-        RouteAfterQuery -->|No: Conversational| GenerateAnswer[generate_answer\nLLM Response Synthesis]
+        RouteAfterQuery -->|No: Conversational| FailedNode[failed\nStatic Fallback Response]
         RouteAfterQuery -->|Yes: Data Query| ValidateQuery[validate\nField & Operator Check]
 
         ValidateQuery --> RouteAfterValidation{Validation Result}
         RouteAfterValidation -->|Valid| ExecuteQuery[execute\nAsync MongoDB Run]
         RouteAfterValidation -->|Invalid & Retries Left| GenerateQuery
-        RouteAfterValidation -->|Invalid & Max Retries Exceeded| FailedNode[failed\nGraceful Fallback]
+        RouteAfterValidation -->|Invalid & Max Retries Exceeded| FailedNode
 
-        ExecuteQuery --> GenerateAnswer
+        ExecuteQuery --> GenerateAnswer[generate_answer\nLLM Response Synthesis]
     end
 
     ExecuteQuery <--> MongoDB[(MongoDB\npurchases collection)]
@@ -72,7 +72,7 @@ flowchart TD
 
 1. **`add_user_message`:** Appends the user question to the message history and resets transient execution state (`query`, `pipeline`, `results`, `error_message`, `retry_count`).
 2. **`generate_query`:** Invokes OpenAI using Pydantic structured output (`QueryGeneration`) with system prompts and recent conversation history (limited by `MAX_HISTORY_MESSAGES`). If a prior error occurred, the error context is injected for self-correction.
-3. **`route_after_query`:** Inspects `requires_query`. If `False`, skips database execution and routes directly to `generate_answer`.
+3. **`route_after_query`:**Inspects `requires_query`. If True, routes to validate for safety checks. If False (greetings, chit-chat, or general non-data questions), routes to failed, which returns a static fallback reply without invoking the answer-generation LLM — avoiding unnecessary token usage.
 4. **`validate`:** Recursively checks all query keys, operators, stages, and field names. On failure, increments `retry_count` and stores `error_message`.
 5. **`route_after_validation`:**
    - **Success:** Routes to `execute`.

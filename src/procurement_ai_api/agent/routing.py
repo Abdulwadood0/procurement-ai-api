@@ -16,4 +16,4 @@ def route_after_query(state: AgentState) -> str:
     if state.get("requires_query"):
         return "validate"
 
-    return "generate_answer"
+    return "failed"

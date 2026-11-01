@@ -51,7 +51,7 @@ builder.add_conditional_edges(
     route_after_query,
     {
         "generate_answer": "generate_answer",
-        "validate" : "validate"
+        "failed" : "failed"
     },
 )
    

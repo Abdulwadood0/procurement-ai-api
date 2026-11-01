@@ -256,10 +256,22 @@ async def add_user_message(state: AgentState) -> dict:
     }
 
 
-async def return_error(state: AgentState) -> dict:
+def return_error(state: AgentState) -> dict:
+    # Conversational path: requires_query is False and no query error occurred
+    if not state.get("requires_query") and not state.get("error_message"):
+        return {
+            "answer": (
+                "Hi! I'm your procurement data assistant. I can answer questions "
+                "about the State of California purchase records (2012–2015) "
+                "for example: \"What were the top 5 largest purchases in 2014?\" "
+                "or \"Which department spent the most on IT Goods?\""
+            )
+        }
+
+    # Validation-failure path: retries exhausted
     return {
         "answer": (
-            "I couldn't generate a valid database query."
+            "I couldn't generate a valid database query for that. "
             "Please try rephrasing your question."
         )
     }

@@ -17,6 +17,7 @@ This application translates natural-language procurement questions into secure M
 - [Data Preparation](#data-preparation)
 - [API Reference](#api-reference)
 - [Configuration & Environment Variables](#configuration--environment-variables)
+- [Evaluations](#evaluations)
 - [Design Decisions & Trade-offs](#design-decisions--trade-offs)
 - [Getting Started](#getting-started)
 - [Limitations & Roadmap](#limitations--roadmap)
@@ -277,6 +278,20 @@ FRONTEND_URL=Your frontend url
 | `MAX_HISTORY_MESSAGES`| `integer` | `10` | Maximum number of preceding conversation messages supplied to the LLM context window. |
 
 ---
+## Evaluations
+
+To evaluate the assistant's performance, the system was tested against a variety of sample queries, specifically targeting complex and multi-step procurement questions. The table below verifies the accuracy of the generated MongoDB aggregation pipelines and the relevance of the final natural language responses. It also tracks database and LLM execution times to demonstrate the system's efficiency.
+
+| Question | Generated Mongo Query | Execution Time (DB / LLM) | DB Data Returned | LLM Final Answer | Result |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| How many orders were created in 2014? | `[{'$match': {'creation_date': {'$gte': '2014-01-01', '$lt': '2015-01-01'}}}, {'$group': {'_id': None, 'order_count': {'$sum': 1}}}]` | 28ms / 0.98s | 120,214 | 120,214 | Pass |
+| Which quarter had the highest total spending? | `[{'$group': {'_id': {'year': {'$year': '$creation_date'}, 'quarter': {'$ceil': {'$divide': [{'$month': '$creation_date'}, 3]}}}, 'total_spending': {'$sum': '$total_price'}}}, {'$sort': {'total_spending': -1}}, {'$limit': 1}]` | 1388ms / 2.08s | Q2 2015, 27,866,227,017.17 | The highest total spending was in Q2 2015, with 27,866,227,017.17 in total spending. | Pass |
+| How many orders were for it goods? | `[{'$match': {'acquisition_type': {'$eq': 'IT Goods'}}}, {'$group': {'_id': None, 'order_count': {'$sum': 1}}}]` | 23ms / 1.21s | 50,900 | There were 50,900 orders for IT goods. | Pass |
+| What are the top 3 segments by total spend in fiscal year 2014-2015 | `[{'$match': {'fiscal_year': '2014-2015'}}, {'$group': {'_id': '$segment_title', 'total_spend': {'$sum': '$total_price'}}}, {'$sort': {'total_spend': -1}}, {'$limit': 3}]` | 203ms / 2.39s | 1. Healthcare Services, 2. Politics and Civic Affairs, 3. Management and Business Professionals | The top 3 segments by total spend in fiscal year 2014–2015 are: 1. Healthcare Services — 28,780,636,594.44... | Pass |
+| How many orders were created in July 2013? | `[{'$match': {'creation_date': {'$gte': '2013-07-01', '$lt': '2013-08-01'}}}, {'$group': {'_id': None, 'order_count': {'$sum': 1}}}]` | 4ms / 1.53s | 9,427 | There were 9,427 orders created in July 2013. | Pass |
+| Which supplier has the most orders? | `[{'$group': {'_id': '$supplier_name', 'order_count': {'$sum': 1}}}, {'$sort': {'order_count': -1}}, {'$limit': 1}]` | 293ms / 1.15s | Voyager Fleet Systems Inc (13,756) | The supplier with the most orders is Voyager Fleet Systems Inc with 13,756 orders. | Pass |
+| What are the top 5 most frequently ordered items by the Department of Corrections and Rehabilitation? | `[{'$match': {'department_name': {'$regex': 'Corrections and Rehabilitation', '$options': 'i'}}}, {'$group': {'_id': {'$toLower': '$item_name'}, 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 5}]` | 432ms / 1.99s | bread (308), carrier replacement (300), vest stab (293), chicken (283), fresh produce (281) | The top 5 most frequently ordered items by the Department of Corrections and Rehabilitation are: 1. bread... | Pass |
+
 
 
 ---

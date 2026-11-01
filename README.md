@@ -421,9 +421,8 @@ The backend includes CORS middleware configured by default to permit requests fr
 
 ## Limitations & Roadmap
 
-- **In-Memory Checkpointing:** Conversation memory is currently backed by `InMemorySaver`. Sessions do not persist across application restarts. *Roadmap: Add persistent checkpointer support (e.g. MongoDB or Redis checkpointer).*
-- **Collection Scope:** Queries are scoped to the `purchases` collection.
-- **Result Pagination:** `find` queries are restricted to 20 documents and `aggregate` to 100 documents to preserve LLM token limits and performance.
+- **In-Memory Checkpointing:** Conversation memory is currently backed by `InMemorySaver`. Sessions do not persist across application restarts. *Roadmap: Add persistent checkpointer support (MongoDB checkpointer).*
+- **Result Pagination:** `find` queries are restricted to 20 documents and `aggregate` to 100 documents to preserve LLM token limits.
 
 ---
 

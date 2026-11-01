@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [
-    { name = "Abdul Wadoud", email = "abdwadood.kr@gmail.com" }
+    { name = "Abdul Wadoud" }
 ]
 requires-python = ">=3.14"
 dependencies = [
@@ -16,18 +16,20 @@ dependencies = [
     "pymongo>=4.19.0",
 ]
 
-[project.scripts]
-procurement-ai-api = "procurement_ai_api:main"
 
 [build-system]
 requires = ["uv_build>=0.12.15,<0.13.0"]
 build-backend = "uv_build"
 
+
+[tool.fastapi]
+entrypoint = "procurement_ai_api.main:app"
+
+
 [dependency-groups]
 dev = [
     "pytest>=9.2.0",
     "pytest-asyncio>=1.4.1",
-    "pytest-cov>=7.1.0",
 ]
 
 [tool.pytest.ini_options]

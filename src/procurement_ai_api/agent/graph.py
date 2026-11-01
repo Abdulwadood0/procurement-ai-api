@@ -43,14 +43,13 @@ builder.add_node("add_user_message", add_user_message)
 builder.add_edge(START, "add_user_message")
 builder.add_edge("add_user_message", "generate_query")
 
-# builder.add_edge("generate_query", "validate")
 
 # After generating a query
 builder.add_conditional_edges(
     "generate_query",
     route_after_query,
     {
-        "generate_answer": "generate_answer",
+        "validate": "validate",
         "failed" : "failed"
     },
 )

@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 
     AI_MODEL: str 
 
+    FRONTEND_URL: str
+
     model_config = SettingsConfigDict(env_file=".env")
 
 

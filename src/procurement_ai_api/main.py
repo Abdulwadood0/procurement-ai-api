@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from procurement_ai_api.core.database import db_manager
+from procurement_ai_api.core.config import settings
 from procurement_ai_api.api.routes.chat import router as chat_router
 from procurement_ai_api.core.logging_config import setup_logging
 
@@ -40,13 +41,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-origins = [
-    "http://localhost:4200",
-]
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[
+        settings.FRONTEND_URL
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

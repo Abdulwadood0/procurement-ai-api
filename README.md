@@ -263,6 +263,8 @@ AI_MODEL=gpt-4.1-mini
 # Agent Execution Configuration (Optional, defaults shown)
 MAX_RETRIES=2
 MAX_HISTORY_MESSAGES=10
+
+FRONTEND_URL=Your frontend url
 ```
 
 ### Environment Variables Details

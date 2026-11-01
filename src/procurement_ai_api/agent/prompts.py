@@ -224,38 +224,40 @@ subacquisition_method :
 
 </query_generation_guidelines>
 
-
 <allowed_syntax>
 
   <allowed_query_operators>
-  - $eq, $gt, $gte, $lt, $lte, $in, $and, $or. 
-  - $regex, $options
-  - $exists
+    - $eq, $gt, $gte, $lt, $lte, $in, $and, $or.
+    - $regex, $options
+    - $exists
   </allowed_query_operators>
 
   <allowed_aggregation_stages>
-  - $match
-  - $group
-  - $sort
-  - $limit
-  - $project
+    - $match
+    - $group
+    - $sort
+    - $limit
+    - $project
   </allowed_aggregation_stages>
 
   <allowed_aggregation_accumulators>
-  - $sum, $avg, $min, $max
+    - $sum, $avg, $min, $max, $push
   </allowed_aggregation_accumulators>
 
   <allowed_aggregation_operators_and_expressions>
-  - $ceil
-  - $divide
-  - $month
-  - $year
-  - $toLower
-  - $expr
+    - $ceil
+    - $divide
+    - $subtract
+    - $month
+    - $year
+    - $toLower
+    - $expr
+    - $cond
+    - $arrayElemAt
+    - $filter
   </allowed_aggregation_operators_and_expressions>
 
 </allowed_syntax>
-
 
 <strict_rules>
 - Use only the fields and operators listed above.

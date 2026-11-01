@@ -43,9 +43,7 @@ The agent orchestrates state transitions through a directed cyclic graph impleme
 
 ```mermaid
 flowchart TD
-    Client([Frontend / Client]) -->|POST /chat/| FastAPIRoute[FastAPI Route /chat/]
-    FastAPIRoute --> ChatService[Chat Service stream_chat]
-    ChatService --> LangGraphAgent[LangGraph StateGraph]
+    Client([Frontend / Client]) 
 
     subgraph Agent Graph
         START((START)) --> AddUserMessage[add_user_message]
